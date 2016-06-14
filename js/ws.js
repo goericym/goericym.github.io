@@ -3,13 +3,8 @@
 //The dot (.) specifies to select elements by their classname
 window.addEventListener("load", init, false);//載入時會呼叫init的function
 // Globa變數都放在這
-var AutoSendFlag = 0;
-var ManuallySendFlag = 0;
 var wsi;
-var GlobalTLResult = 0;
 var reloadCount = 0;
-var chekcw = false;
-var bkeepConn = true;//一問一答
 var inputtext = '';
 var myTimer;
 function wsiMsg(param) {
@@ -20,11 +15,28 @@ function init() {
   wsi.dlinit('<div id="wsimsg"> <div>');
   wsi.open();
   // setTimeout(function () { wsiMsg('haha'); }, 2000);
-
+  setInterval(ErrorCount, 1000)
   //step1 :先做browser檢查
   WebSocketCheck(WSCheckPass, WSCheckFail)
 }
-
+function ErrorCount() {
+  reloadCount++;
+  console.log(reloadCount)
+  if (reloadCount > 10) {
+    console.log('error')
+  }
+  //  if (reloadCount > 1) {
+  //   doDisconnect();
+  //   doConnect();
+  // }
+  // if (reloadCount > 2) {
+  //   wsi.open();
+  // }
+  // if (reloadCount > 10) {
+  //   location.reload();
+  //   reloadCount = 0
+  // }
+}
 function WSCheckPass() {
   //step2 :開啟WS
   doConnect();
@@ -41,22 +53,6 @@ function WSCheckFail() {
 
   wsiMsg('Your browser does not support ws');
 
-}
-function loopbefore() {
-  reloadCount++;
-  // console.log(reloadCount)
-  if (reloadCount > 1) {
-    doDisconnect();
-    doConnect();
-  }
-  // if (reloadCount > 2) {
-  //   wsi.open();
-  // }
-  if (reloadCount > 10) {
-    location.reload();
-    reloadCount = 0
-  }
-  console.log('autosend:ManuallySendFlag=' + ManuallySendFlag + ':AutoSendFlag=' + AutoSendFlag + ':bkeepConn=' + bkeepConn)
 }
 
 function CheckVersion(param, callback_pass, callback_fail) {
@@ -103,32 +99,24 @@ function CCS_fail() {
 
 
 function AutoSend() {
+  // myTimer = setInterval(AutoSend, 2000)
+  clearInterval(myTimer);
+  inputtext = '{"KeepConn":"None"}';
+  doSend(inputtext);
 
-  loopbefore();
-
-  if (bkeepConn) {
-    if (AutoSendFlag == 0 && ManuallySendFlag == 0) {
-      AutoSendFlag = 1;
-    }
-
-    inputtext = '{"KeepConn":"None"}';
-    doSend(inputtext);
-  } else {
-    reloadCount = 0;
-  }
 }
 function ManuallySend() {
-  ManuallySendFlag = 1;
+  clearInterval(myTimer);
   inputtext = '{"Read":"None"}';
   doSend(inputtext);
 }
 function ManuallySendCmd(params) {
-  ManuallySendFlag = 1;
+  clearInterval(myTimer);
   inputtext = params;
   doSend(inputtext);
 }
 function ManuallySendProgressBar(params) {
-  ManuallySendFlag = 1;
+  clearInterval(myTimer);
   bkeepConn = false//一問多答開始
   inputtext = params;
   doSend(inputtext);
@@ -197,71 +185,64 @@ function doCheckStatus(param) {
 }
 function WSMessage(evt) {
   reloadCount = 0;
-
-  if (inputtext.startsWith('{"CheckVersion":"')) {
+  clearInterval(myTimer);
+  //Part A 不需要啟動AutoSend,做完要用return
+  if (inputtext.indexOf('CheckVersion') > 0) {
     doCheckVer(evt.data);
     return;
   }
 
-  if (inputtext.startsWith('{"CheckComStatus":"')) {
+  if (inputtext.indexOf('CheckComStatus') > 0) {
     doCheckStatus(evt.data);
     return;
   }
 
-  console.log(evt.data)
-  // callname(evt.data)
-  // allopen();
-  if (AutoSendFlag == 0 && ManuallySendFlag == 1) {
-    ManuallySendFlag = 0;
-  }
-
-  AutoSendFlag = 0;
-  // console.log('WSMessage:ManuallySendFlag=' + ManuallySendFlag + ':AutoSendFlag=' + AutoSendFlag)
-  //  $('#btn-test').html('balabala');
-
-  if (inputtext == '{"OnlyRead":"Display"}') {
-    JsonParser_Display(evt.data)
-  }
-  if (inputtext === '{"ProgressBar":"None"}') {
-    // console.log(evt.data)
-    if (evt.data === '{"ProgressBar":"Finish"}') {
-      bkeepConn = true//一問多答結束
-    }
-  }
-  if (evt.data === '{"WriteCustomize":"Finish"}') {
-    wsi.close();
-  }
-  if (inputtext === '{"TestHistory":"None"}') {
-    JsonParser_TestHistory(evt.data)
-  }
-  // writeToScreen("response: " + evt.data + '\n');
-  if (inputtext.startsWith('{"DownloadFW":"')) {
+  if (inputtext.indexOf('DownloadFW') > 0) {
     var jsonObj = JSON.parse(evt.data);
     console.log(jsonObj);
 
     var valeur = jsonObj.DownloadFWProgressBar;
     $('#bar1').css('width', valeur + '%').attr('aria-valuenow', valeur);
     if (evt.data === '{"DownloadFWProgressBar":"Finish"}') {
-      bkeepConn = true//一問多答結束
+      //一問多答結束
+      myTimer = setInterval(AutoSend, 2000)
       $('#GFW').attr("disabled", false);
     }
+    return;
   }
+  console.log(evt.data)
+
+  //Part B 啟動AutoSend
+  myTimer = setInterval(AutoSend, 2000)
+
+  if (inputtext == '{"OnlyRead":"Display"}') {
+    JsonParser_Display(evt.data)
+  }
+  if (inputtext == '{"Read":"Display"}') {
+    wsi.close()
+    JsonParser_Display(evt.data)
+  }
+  if (evt.data === '{"WriteCustomize":"Finish"}') {
+    wsi.close();
+  }
+  if (inputtext === '{"TestHistory":"None"}') {
+    wsi.close()
+    JsonParser_TestHistory(evt.data)
+  }
+
 
 }
 
 function WSError(evt) {
-  // writeToScreen('error: ' + evt.data + '\n');
+
 
   websocket.close();
-
-  // document.myform.connectButton.disabled = false;
-  // document.myform.disconnectButton.disabled = true;
+  console.log(evt);
 
 }
 
 function doSend(message) {
 
-  // writeToScreen("sent: " + message + '\n');
   console.log("sent: " + message + '\n');
   try {
     websocket.send(message);

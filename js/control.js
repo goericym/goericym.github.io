@@ -11,24 +11,15 @@ function tshowDiv(id) {
 
 var ID_arr = ['Info_tabs', 'SWUpgrade', 'Cust_tabs', 'VehicleTest', 'TestRecode', 'Print'];
 function showDiv(idname) {
-
-    if (idname === 'TestRecode') {
-        ManuallySendCmd('{"TestHistory":"None"}');
-    }
-
     for (i = 0; i < ID_arr.length; i++) {
         var value = ID_arr[i];
-
         if (idname == value) {
             document.getElementById(value).style.display = "block";
-
         }
         else {
             document.getElementById(value).style.display = "none";
-
         }
     }
-
 }
 function aaa(id) {
     document.getElementById(id).innerHTML = "aaa"
@@ -323,8 +314,15 @@ function UpgradeFW() {
 
 }
 
-function doinfo() {
+function DoInfo() {
+    wsiMsg('Get infomation please wait');
+    wsi.open();
+    ManuallySendCmd('{"Read":"Display"}');
 
-    ManuallySendCmd('{"OnlyRead":"Display"}');
+}
 
+function DoTestRecode() {
+    wsiMsg('Get TestHistory please wait');
+    wsi.open();
+    ManuallySendCmd('{"TestHistory":"None"}');
 }
