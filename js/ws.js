@@ -138,7 +138,7 @@ function doConnect() {
     var n = new Date().toLocaleString();
     console.log(n)
     wsiMsg('Please Waiting... <a hef="#">download</a> <a hef="#">FAQ</a>>');
-    url = "ws://localhost:58000/";
+    url = "ws://127.0.0.1:58000/";
     websocket = new WebSocket(url);
     websocket.onopen = function (evt) { WSOpen(evt) };
     websocket.onclose = function (evt) { WSClose(evt) };
