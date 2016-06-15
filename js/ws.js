@@ -216,6 +216,7 @@ function WSMessage(evt) {
   myTimer = setInterval(AutoSend, 2000)
 
   if (inputtext == '{"OnlyRead":"Display"}') {
+    wsi.close()
     JsonParser_Display(evt.data)
   }
   if (inputtext == '{"Read":"Display"}') {
