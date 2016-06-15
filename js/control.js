@@ -189,8 +189,8 @@ function PREFERENCE_Mode(param) {
     var arr = ['City', 'MCLIMBING', 'TREKKING']
 
     for (i = 0; i < arr.length; i++) {
-        var S = 'images/Preference_' + arr[i] + '_S.png'
-        var I = 'images/Preference_' + arr[i] + '_I.png'
+        var S = 'Images/Preference_' + arr[i] + '_S.png'
+        var I = 'Images/Preference_' + arr[i] + '_I.png'
         if (param === arr[i]) {
             if ($('#Preference' + param).attr('src') === S) {
                 $('#Preference' + param).attr('src', I);
