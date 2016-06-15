@@ -9,6 +9,7 @@ var inputtext = '';
 var myTimer;
 var TLCount = 0;
 function wsiMsg(param) {
+  console.log(param);
   setTimeout(function () { $('#wsimsg').html(param); }, 300);
 }
 function init() {
@@ -241,6 +242,7 @@ function doTestLightFinish(param) {
   wsi.close()
   myTimer = setInterval(AutoSend, 2000)
   $('#TestLight').html(param)
+  wsiMsg('Test Light : Finish');
 }
 function doTestLight(param) {
   var jsonObj = JSON.parse(param);
@@ -304,10 +306,7 @@ function allopen() {
 
   }
 }
-function JsonParser_VehicleTestLight(params) {
-  var jsonObj = JSON.parse(params);
-  $('#TestLight').html(jsonObj.VehicleTestLight)
-}
+
 function JsonParser_TestHistory(params) {
   var jsonObj = JSON.parse(params);
   //  console.log(jsonObj)

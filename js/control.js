@@ -123,9 +123,9 @@ function TestLight(param) {
     if (typeof param != 'undefined') {
         // $("#test2").attr("disabled", true);
         TLCount = 0;
-        wsi.dlinit('<div id="wsimsg">Test Light</div>')
-        wsi.open()
-        $('#TestLight').html('testing')
+        wsiMsg('Test Light start');
+        wsi.open();
+        $('#TestLight').html('testing');
     }
     ManuallySendCmd('{"VehicleTest":"Light"}');
 }
@@ -229,6 +229,7 @@ function CustomizeApply() {
     var jstr = CustomizeData();
     // console.log(jstr);
     ManuallySendCmd(jstr);
+    wsiMsg('Write please wait');
     wsi.open();
 }
 function jsondata(params) {
