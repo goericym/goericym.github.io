@@ -314,8 +314,11 @@ function Mapping(params) {
       if (sKey === 'PRD_LMOD_DATE') {
         sValue = timeConverter(sValue)
       }
-      if (skey === 'PNL_MAN_DIST') {
-        sValue = sValue / 10000;
+      if (sKey === 'PNL_MAN_DIST') {
+        sValue = sValue / 100000;
+      }
+      if (sKey === 'PNL_ASLP_TIME') {
+        sValue = sValue / 60;
       }
       $(id).html(sValue);
       $(id).val(sValue);//set input value

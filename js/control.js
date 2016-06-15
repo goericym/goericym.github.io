@@ -207,14 +207,14 @@ function PREFERENCE_Mode(param) {
 function CustomizeData() {
 
     var jdata = {
-        'm_BikeID': $('#USER_BIKE_ID').val(),
-        "m_DealerName": $('#DELR_NAME').val(),
-        "m_DealerTel": $('#DELR_TEL_NUM').val(),
-        "m_LastMaintenanceODO": parseFloat($('#PNL_LMAN_DIST').val()),
-        "m_MaintenanceODO": parseFloat($('#PNL_MAN_DIST').val()),
+        'm_BikeID': $('input[id=USER_BIKE_ID]').val(),
+        "m_DealerName": $('input[id=DELR_NAME]').val(),
+        "m_DealerTel": $('input[id=DELR_TEL_NUM]').val(),
         "m_cb_Disable_IsChecked": $('#PNL_MAN_DIST_SW').is(":checked"),
-        "m_AutoSleepTime": parseFloat($('#PNL_ASLP_TIME').val()),
-        "m_WheelDiameter": parseFloat($('#MISC_WEL_DIAM').val()),
+        "m_LastMaintenanceODO": parseFloat($('input[id=PNL_LMAN_DIST]').val()),
+        "m_MaintenanceODO": parseFloat($('input[id=PNL_MAN_DIST]').val()),
+        "m_AutoSleepTime": parseFloat($('input[id=PNL_ASLP_TIME]').val()),
+        "m_WheelDiameter": parseFloat($('input[id=MISC_WEL_DIAM]').val()),
     }
     var jstr = JSON.stringify(jdata)
 
@@ -226,6 +226,7 @@ function CustomizeData() {
 }
 function CustomizeApply() {
     var jstr = CustomizeData();
+    // console.log(jstr);
     ManuallySendCmd(jstr);
     wsi.open();
 }
@@ -334,5 +335,12 @@ function DoCust() {
         wsi.open();
         ManuallySendCmd('{"Read":"Display"}');
     }
+
+}
+
+function DoPNL_MAN_DIST() {
+    var isSelected = $('#PNL_MAN_DIST_SW').is(":checked");
+    $('#PNL_MAN_DIST_Slider').attr("disabled", isSelected)
+    $('#PNL_MAN_DIST').attr("disabled", isSelected)
 
 }
