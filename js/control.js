@@ -186,7 +186,7 @@ function TestMotor() {
 }
 function PREFERENCE_Mode(param) {
 
-    var arr = ['City', 'MCLIMBING', 'TREKKING']
+    var arr = ['CITY', 'MCLIMBING', 'TREKKING']
 
     for (i = 0; i < arr.length; i++) {
         var S = 'Images/Preference_' + arr[i] + '_S.png'
