@@ -315,14 +315,14 @@ function UpgradeFW() {
 }
 
 function DoInfo() {
-    wsiMsg('Get infomation please wait');
-    wsi.open();
+    // wsiMsg('Get infomation please wait');
+    // wsi.open();
     ManuallySendCmd('{"Read":"Display"}');
 
 }
 
 function DoTestRecode() {
-    wsiMsg('Get TestHistory please wait');
-    wsi.open();
+    // wsiMsg('Get TestHistory please wait');
+    // wsi.open();
     ManuallySendCmd('{"TestHistory":"None"}');
 }
