@@ -218,6 +218,7 @@ function WSMessage(evt) {
   if (inputtext == '{"OnlyRead":"Display"}') {
     wsi.close()
     JsonParser_Display(evt.data)
+    setCookie('ckIsReadDP', 'True')
   }
   if (inputtext == '{"Read":"Display"}') {
     wsi.close()

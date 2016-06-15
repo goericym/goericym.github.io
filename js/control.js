@@ -328,7 +328,11 @@ function DoTestRecode() {
 }
 
 function DoCust() {
-    wsiMsg('Get Customization please wait');
-    wsi.open();
-    ManuallySendCmd('{"OnlyRead":"Display"}');
+    var isReadDisplay = getCookie('ckIsReadDP');
+    if (isReadDisplay !== 'True') {
+        wsiMsg('Get Customization please wait');
+        wsi.open();
+        ManuallySendCmd('{"Read":"Display"}');
+    }
+
 }
