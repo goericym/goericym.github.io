@@ -251,7 +251,7 @@ function PDFFile(params) {
 
 function setCookie(cname, cvalue) {
     var d = new Date();
-    d.setTime(d.getTime() + 1200);//exDays * 24 * 60 * 60 * 1000
+    d.setTime(d.getTime() + 18000);//exDays * 24 * 60 * 60 * 1000
     var expires = "expires=" + d.toGMTString();
     document.cookie = cname + "=" + cvalue + "; " + expires;
 }
