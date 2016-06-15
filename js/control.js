@@ -315,7 +315,7 @@ function UpgradeFW() {
 }
 
 function DoInfo() {
-    wsiMsg('Get infomation please wait');
+    wsiMsg('Get information please wait');
     wsi.open();
     ManuallySendCmd('{"Read":"Display"}');
 
@@ -325,4 +325,10 @@ function DoTestRecode() {
     wsiMsg('Get TestHistory please wait');
     wsi.open();
     ManuallySendCmd('{"TestHistory":"None"}');
+}
+
+function DoCust() {
+    wsiMsg('Get Customization please wait');
+    wsi.open();
+    ManuallySendCmd('{"OnlyRead":"Display"}');
 }
