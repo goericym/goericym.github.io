@@ -119,17 +119,18 @@ function TestDisplay3() {
     TD3.start();
 
 }
-function TestLight() {
+function TestLight(param) {
+    if (typeof param != 'undefined') {
+        // $("#test2").attr("disabled", true);
+        TLCount = 0;
+        wsi.dlinit('<div id="wsimsg">Test Light</div>')
+        wsi.open()
+        $('#TestLight').html('testing')
+    }
     ManuallySendCmd('{"VehicleTest":"Light"}');
-    tc = 0;
-    var WT = new WaitTest();
-    step1 = 'testing 33%';
-    step2 = 'testing 66%';
-    step3 = 'Success';
-    MsgArr = [step1, step2, step3]
-    divid = '#TestLight'
-    WT.start(showStatus_fun, MsgArr, divid);
 }
+
+
 function showStatus_fun(param1, param2) {
     // console.log('call')
     // console.log(param1[tc])

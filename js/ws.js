@@ -7,10 +7,12 @@ var wsi;
 var reloadCount = 0;
 var inputtext = '';
 var myTimer;
+var TLCount = 0;
 function wsiMsg(param) {
   setTimeout(function () { $('#wsimsg').html(param); }, 300);
 }
 function init() {
+
   wsi = new waitWSinit();
   wsi.dlinit('<div id="wsimsg"> <div>');
   wsi.open();
@@ -41,8 +43,6 @@ function WSCheckPass() {
   //step2 :開啟WS
   doConnect();
 
-  // LoopOpenWS();
-  // myTimerOpenWS = setInterval(LoopOpenWS, 3000);
   // //0.5秒後起動,2秒送一次資料
   // setTimeout(function () {
   //   myTimer = setInterval(AutoSend, 2000)
@@ -86,6 +86,8 @@ function CCS_pass() {
   wsi.close();
   //step5 :持續連線
   myTimer = setInterval(AutoSend, 2000)
+
+
 }
 function CCS_fail() {
 
@@ -96,15 +98,14 @@ function CCS_fail() {
 
 }
 
-
-
 function AutoSend() {
-  // myTimer = setInterval(AutoSend, 2000)
   clearInterval(myTimer);
+  // wsi.close()
+  // $("#test2").attr("disabled", false);
   inputtext = '{"KeepConn":"None"}';
   doSend(inputtext);
-
 }
+
 function ManuallySend() {
   clearInterval(myTimer);
   inputtext = '{"Read":"None"}';
@@ -117,7 +118,6 @@ function ManuallySendCmd(params) {
 }
 function ManuallySendProgressBar(params) {
   clearInterval(myTimer);
-  bkeepConn = false//一問多答開始
   inputtext = params;
   doSend(inputtext);
 }
@@ -143,7 +143,6 @@ function doConnect() {
 
 function WSOpen(evt) {
 
-
   console.log('connected')
   var a = new Date().toLocaleString();
   console.log(a)
@@ -152,16 +151,11 @@ function WSOpen(evt) {
   inputtext = '{"CheckVersion":""}';
   doSend(inputtext);
 
-  // myTimer = setInterval(LoopCV, 2000)
 }
 
 function WSClose(evt) {
   console.log('disconnected')
   doConnect();
-  // writeToScreen("disconnected\n");
-  // clearInterval(myTimerOpenWS);
-  // clearInterval(myTimer);
-  // myTimerOpenWS = setInterval(LoopOpenWS, 3000);
 }
 
 function doCheckVer(param) {
@@ -186,6 +180,8 @@ function doCheckStatus(param) {
 function WSMessage(evt) {
   reloadCount = 0;
   clearInterval(myTimer);
+  // myTimer.pause();
+  console.log(evt.data)
   //Part A 不需要啟動AutoSend,做完要用return
   if (inputtext.indexOf('CheckVersion') > 0) {
     doCheckVer(evt.data);
@@ -210,7 +206,12 @@ function WSMessage(evt) {
     }
     return;
   }
-  console.log(evt.data)
+
+  if (inputtext === '{"VehicleTest":"Light"}') {
+    doTestLight(evt.data);
+    return;
+  }
+
 
   //Part B 啟動AutoSend
   myTimer = setInterval(AutoSend, 2000)
@@ -233,30 +234,47 @@ function WSMessage(evt) {
     JsonParser_TestHistory(evt.data)
   }
 
+}
+function doTestLightFinish(param) {
 
+  // $("#test2").attr("disabled", false);
+  wsi.close()
+  myTimer = setInterval(AutoSend, 2000)
+  $('#TestLight').html(param)
+}
+function doTestLight(param) {
+  var jsonObj = JSON.parse(param);
+  var res = jsonObj.VehicleTestLight;
+  if (TLCount >= 3) {
+    doTestLightFinish(res);
+    return true;
+  }
+
+  if (res === 'Pass') {
+    TLCount++;
+    wsiMsg('Test Light : ' + TLCount);
+    setTimeout(TestLight, 1000);
+    return true;
+  }
+  else {
+    doTestLightFinish(res);
+    return false;
+  }
 }
 
 function WSError(evt) {
-
-
   websocket.close();
   console.log(evt);
-
 }
 
 function doSend(message) {
-
   console.log("sent: " + message + '\n');
   try {
     websocket.send(message);
   } catch (error) {
     console.log('doSend Error : ' + error)
   }
-
 }
-
-
-
 
 function doDisconnect() {
 		websocket.close();
@@ -285,6 +303,10 @@ function allopen() {
     inputs[i].disabled = false;
 
   }
+}
+function JsonParser_VehicleTestLight(params) {
+  var jsonObj = JSON.parse(params);
+  $('#TestLight').html(jsonObj.VehicleTestLight)
 }
 function JsonParser_TestHistory(params) {
   var jsonObj = JSON.parse(params);
@@ -330,12 +352,8 @@ function Mapping(params) {
         $(id).attr('onclick', "PDFFile('" + sValue + "')");
       }
 
-
     } catch (error) {
-
       console.log(sKey + ' ' + error);
-
     }
-
   }
 }

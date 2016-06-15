@@ -164,7 +164,7 @@ function waitWSinit() {
         // console.log(isOpen);
         if (isOpen === true) {
             isOpen = false;
-
+            // setTimeout(function () { dialog.close(); }, 500);
             dialog.close();
         }
 
@@ -207,3 +207,19 @@ function WaitTest() {
 
 
 
+function Timer(callback, delay) {
+    var timerId, start, remaining = delay;
+
+    this.pause = function () {
+        window.clearTimeout(timerId);
+        remaining -= new Date() - start;
+    };
+
+    this.resume = function () {
+        start = new Date();
+        window.clearTimeout(timerId);
+        timerId = window.setTimeout(callback, remaining);
+    };
+
+    this.resume();
+}
