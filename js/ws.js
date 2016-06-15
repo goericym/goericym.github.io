@@ -314,6 +314,9 @@ function Mapping(params) {
       if (sKey === 'PRD_LMOD_DATE') {
         sValue = timeConverter(sValue)
       }
+      if (skey === 'PNL_MAN_DIST') {
+        sValue = sValue / 10000;
+      }
       $(id).html(sValue);
       $(id).val(sValue);//set input value
       var sname = 'input[name=' + sKey + ']';
