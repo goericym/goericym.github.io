@@ -21,9 +21,7 @@ function showDiv(idname) {
         }
     }
 }
-function aaa(id) {
-    document.getElementById(id).innerHTML = "aaa"
-}
+
 
 //拉條輸入框事件
 $(document).ready(function () {
@@ -123,8 +121,8 @@ function TestLight(param) {
     if (typeof param != 'undefined') {
         // $("#test2").attr("disabled", true);
         TLCount = 0;
-        wsiMsg('Test Light start');
-        wsi.open();
+        DLmsg.setMsg('Test Light start');
+        DLmsg.open();
         $('#TestLight').html('testing');
     }
     ManuallySendCmd('{"VehicleTest":"Light"}');
@@ -142,48 +140,78 @@ function showStatus_fun(param1, param2) {
     // }
 }
 function TestDriver() {
+    DLmsg.setMsg('Test Driver');
+    DLmsg.open()
+    $('#TestDriver').html('Testing');
     ManuallySendCmd('{"VehicleTest":"Driver"}');
-    tc = 0;
-    var WT = new WaitTest();
-    step1 = 'testing 33%';
-    step2 = 'testing 66%';
-    step3 = 'Success';
-    MsgArr = [step1, step2, step3]
-    divid = '#TestDriver'
-    WT.start(showStatus_fun, MsgArr, divid);
+
+}
+function TestDriverEnd(param) {
+    DLmsg.close()
+    var jsonObj = JSON.parse(param);
+    $('#TestDriver').html(jsonObj.VehicleTestDriver);
 }
 function TestCadenceSensor() {
-    ManuallySendCmd('{"VehicleTest":"Cadence_Sensor"}');
-    tc = 0;
-    var WT = new WaitTest();
-    step1 = 'testing 33%';
-    step2 = 'testing 66%';
-    step3 = 'Success';
-    MsgArr = [step1, step2, step3]
-    divid = '#TestCadenceSensor'
-    WT.start(showStatus_fun, MsgArr, divid);
+    DLmsg.setMsg('VehicleTest TestCadenceSensor');
+    DLmsg.open()
+    $('#TestCadenceSensor').html('Testing');
+    ManuallySendCmd('{"VehicleTest":"CadenceSensor"}');
+
+}
+function CadenceSensorCheck(param) {
+    var jsonObj = JSON.parse(param);
+    if (typeof jsonObj.RPM != 'undefined') {
+        DLmsg.setMsg('Please Roll the Crank ! RPM :' + jsonObj.RPM + ', Count : ' + jsonObj.Count + '<button id="wsiBtn" type="button" onclick="wsiclose()">OK</button>');
+        $('#wsiBtn').hide();
+    }
+
+    if (jsonObj.TestMaxRPM === 'Pass') {
+        myTimer = setInterval(AutoSend, 2000);
+        $('#wsiBtn').show();
+    }
+    if (jsonObj.TestMaxRPM === 'Fail') {
+        myTimer = setInterval(AutoSend, 2000);
+        DLmsg.close();
+    }
+
+}
+function wsiclose() {
+    DLmsg.close();
 }
 function TestSpeedSensor() {
-    ManuallySendCmd('{"VehicleTest":"Speed_Sensor"}');
-    tc = 0;
-    var WT = new WaitTest();
-    step1 = 'testing 33%';
-    step2 = 'testing 66%';
-    step3 = 'Success';
-    MsgArr = [step1, step2, step3]
-    divid = '#TestSpeedSensor'
-    WT.start(showStatus_fun, MsgArr, divid);
+    DLmsg.setMsg('VehicleTest TestSpeedSensor');
+    DLmsg.open()
+    $('#TestSpeedSensor').html('Testing');
+    ManuallySendCmd('{"VehicleTest":"SpeedSensor"}');
+
+}
+function TestSpeedSensorEnd(param) {
+    DLmsg.close()
+    var jsonObj = JSON.parse(param);
+    $('#TestMotor').html(jsonObj.VehicleTestSpeedSensor);
 }
 function TestMotor() {
+    DLmsg.setMsg('VehicleTest Motor');
+    DLmsg.open()
+    $('#TestMotor').html('Testing');
     ManuallySendCmd('{"VehicleTest":"Motor"}');
-    tc = 0;
-    var WT = new WaitTest();
-    step1 = 'testing 33%';
-    step2 = 'testing 66%';
-    step3 = 'Success';
-    MsgArr = [step1, step2, step3]
-    divid = '#TestMotor'
-    WT.start(showStatus_fun, MsgArr, divid);
+
+}
+function TestMotorEnd(param) {
+    DLmsg.close()
+    var jsonObj = JSON.parse(param);
+    $('#TestMotor').html(jsonObj.VehicleTestMotor);
+}
+function TestBattery() {
+    DLmsg.setMsg('VehicleTest Battery');
+    DLmsg.open()
+    $('#TestBattery').html('Testing');
+    ManuallySendCmd('{"VehicleTest":"Battery"}');
+}
+function TestBatteryEnd(param) {
+    DLmsg.close()
+    var jsonObj = JSON.parse(param);
+    $('#TestBattery').html(jsonObj.VehicleTestBattery);
 }
 function PREFERENCE_Mode(param) {
 
@@ -229,8 +257,8 @@ function CustomizeApply() {
     var jstr = CustomizeData();
     // console.log(jstr);
     ManuallySendCmd(jstr);
-    wsiMsg('Write please wait');
-    wsi.open();
+    DLmsg.setMsg('Write please wait');
+    DLmsg.open();
 }
 function jsondata(params) {
     var jdata = {
@@ -318,23 +346,23 @@ function UpgradeFW() {
 }
 
 function DoInfo() {
-    wsiMsg('Get information please wait');
-    wsi.open();
+    DLmsg.setMsg('Get information please wait');
+    DLmsg.open();
     ManuallySendCmd('{"Read":"Display"}');
 
 }
 
 function DoTestRecode() {
-    wsiMsg('Get TestHistory please wait');
-    wsi.open();
+    DLmsg.setMsg('Get TestHistory please wait');
+    DLmsg.open();
     ManuallySendCmd('{"TestHistory":"None"}');
 }
 
 function DoCust() {
     var isReadDisplay = getCookie('ckIsReadDP');
     if (isReadDisplay !== 'True') {
-        wsiMsg('Get Customization please wait');
-        wsi.open();
+        DLmsg.setMsg('Get Customization please wait');
+        DLmsg.open();
         ManuallySendCmd('{"Read":"Display"}');
     }
 
@@ -345,4 +373,31 @@ function DoPNL_MAN_DIST() {
     $('#PNL_MAN_DIST_Slider').attr("disabled", isSelected)
     $('#PNL_MAN_DIST').attr("disabled", isSelected)
 
+}
+function TestBT() {
+    DLmsg.setMsg('test bt');
+    DLmsg.open();
+    $('#TestBT').html('Testing');
+    ManuallySendCmd('{"VehicleTest":"BT"}');
+}
+function TestBTEnd(param) {
+    DLmsg.close()
+    var jsonObj = JSON.parse(param);
+    $('#TestBT').html(jsonObj.VehicleTestBT);
+}
+// $('#TRTestBT').after('<tr></tr>').hide();
+
+
+function testbtn() {
+    var n = new Date();
+    DLmsg.setMsg(n);
+    DLmsg.open();
+    setTimeout(function () { DLmsg.close(); }, 2000);
+}
+
+function testbtn1() {
+    var n = new Date();
+    DLbtn.setMsg(n);
+    DLbtn.open();
+    DLbtn.btnAction(bttt)
 }

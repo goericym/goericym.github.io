@@ -1,23 +1,41 @@
 //JQuery
 //The hash (#) specifies to select elements by their ID's 
 //The dot (.) specifies to select elements by their classname
-window.addEventListener("load", init, false);//載入時會呼叫init的function
+window.addEventListener("load", init1, false);//載入時會呼叫init的function
 // Globa變數都放在這
-var wsi;
+var DLmsg;
+var DLbtn;
 var reloadCount = 0;
 var inputtext = '';
 var myTimer;
 var TLCount = 0;
-function wsiMsg(param) {
-  console.log(param);
-  setTimeout(function () { $('#wsimsg').html(param); }, 300);
+function init1() {
+
+  DLmsg = new DialogMsg();
+  DLmsg.dlinit('init');
+  DLmsg.open();
+  DLbtn = new DialogBtn();
+  DLbtn.dlinit('init');
+  DLmsg.close()
+  DLbtn.open()
+  DLbtn.btnAction(bttt)
+  setTimeout(function () { DLbtn.btbEnable(); }, 2000);
+}
+function bttt(){
+  var n = new Date();
+
+  console.log('bttt : '+ n)
+  alert('hi');
+  DLbtn.close();
 }
 function init() {
 
-  wsi = new waitWSinit();
-  wsi.dlinit('<div id="wsimsg"> <div>');
-  wsi.open();
-  // setTimeout(function () { wsiMsg('haha'); }, 2000);
+  DLmsg = new DialogMsg();
+  DLmsg.dlinit('init');
+  DLmsg.open();
+  DLbtn = new DialogBtn();
+  DLbtn.dlinit('init');
+  // setTimeout(function () { DLmsg.setMsg('haha'); }, 2000);
   setInterval(ErrorCount, 1000)
   //step1 :先做browser檢查
   WebSocketCheck(WSCheckPass, WSCheckFail)
@@ -28,17 +46,15 @@ function ErrorCount() {
   if (reloadCount > 10) {
     console.log('error')
   }
-  //  if (reloadCount > 1) {
-  //   doDisconnect();
-  //   doConnect();
-  // }
-  // if (reloadCount > 2) {
-  //   wsi.open();
-  // }
-  // if (reloadCount > 10) {
-  //   location.reload();
-  //   reloadCount = 0
-  // }
+
+  if (reloadCount > 5) {
+    // DLmsg.setMsg('斷線中');
+    // DLmsg.open();
+  }
+  if (reloadCount > 20) {
+    location.reload();
+    reloadCount = 0
+  }
 }
 function WSCheckPass() {
   //step2 :開啟WS
@@ -52,7 +68,7 @@ function WSCheckPass() {
 
 function WSCheckFail() {
 
-  wsiMsg('Your browser does not support ws');
+  DLmsg.setMsg('Your browser does not support ws');
 
 }
 
@@ -70,7 +86,7 @@ function CV_pass() {
   doSend(inputtext);
 }
 function CV_fail() {
-  wsiMsg('Your Version too old ! please download last version <A HREF="#">Click to Downoad</A>');
+  DLmsg.setMsg('Your Version too old ! please download last version <A HREF="#">Click to Downoad</A>');
 
 }
 
@@ -84,7 +100,7 @@ function CheckComStatus(param, callback_pass, callback_fail) {
   }
 }
 function CCS_pass() {
-  wsi.close();
+  DLmsg.close();
   //step5 :持續連線
   myTimer = setInterval(AutoSend, 2000)
 
@@ -92,7 +108,7 @@ function CCS_pass() {
 }
 function CCS_fail() {
 
-  wsiMsg('Your dongle 沒有接好 ! please check connected');
+  DLmsg.setMsg('Your dongle 沒有接好 ! please check connected');
 
   //回到step4
   CV_pass();
@@ -101,7 +117,7 @@ function CCS_fail() {
 
 function AutoSend() {
   clearInterval(myTimer);
-  // wsi.close()
+  // DLmsg.close()
   // $("#test2").attr("disabled", false);
   inputtext = '{"KeepConn":"None"}';
   doSend(inputtext);
@@ -126,7 +142,7 @@ function doConnect() {
   try {
     var n = new Date().toLocaleString();
     console.log(n)
-    wsiMsg('Please Waiting... <a hef="#">download</a> <a hef="#">FAQ</a>>');
+    DLmsg.setMsg('Please Waiting... <a hef="#">download</a> <a hef="#">FAQ</a>>');
     url = "ws://127.0.0.1:58000/";
     websocket = new WebSocket(url);
     websocket.onopen = function (evt) { WSOpen(evt) };
@@ -137,7 +153,7 @@ function doConnect() {
     console.log(error);
     var n = new Date().toLocaleString();
     console.log(n)
-    setTimeout(doConnect, 1000);
+    setTimeout(doConnect, 1000);//斷線重連
   }
 
 }
@@ -147,7 +163,7 @@ function WSOpen(evt) {
   console.log('connected')
   var a = new Date().toLocaleString();
   console.log(a)
-  wsiMsg('check client 版本!');
+  DLmsg.setMsg('Check Client 版本!');
   //step3 :檢查版本
   inputtext = '{"CheckVersion":""}';
   doSend(inputtext);
@@ -180,27 +196,29 @@ function doCheckStatus(param) {
 }
 function WSMessage(evt) {
   reloadCount = 0;
+
   clearInterval(myTimer);
   // myTimer.pause();
-  console.log(evt.data)
+  console.log(evt.data);
+  var eData = evt.data;
   //Part A 不需要啟動AutoSend,做完要用return
   if (inputtext.indexOf('CheckVersion') > 0) {
-    doCheckVer(evt.data);
+    doCheckVer(eData);
     return;
   }
 
   if (inputtext.indexOf('CheckComStatus') > 0) {
-    doCheckStatus(evt.data);
+    doCheckStatus(eData);
     return;
   }
 
   if (inputtext.indexOf('DownloadFW') > 0) {
-    var jsonObj = JSON.parse(evt.data);
+    var jsonObj = JSON.parse(eData);
     console.log(jsonObj);
 
     var valeur = jsonObj.DownloadFWProgressBar;
     $('#bar1').css('width', valeur + '%').attr('aria-valuenow', valeur);
-    if (evt.data === '{"DownloadFWProgressBar":"Finish"}') {
+    if (eData === '{"DownloadFWProgressBar":"Finish"}') {
       //一問多答結束
       myTimer = setInterval(AutoSend, 2000)
       $('#GFW').attr("disabled", false);
@@ -209,40 +227,62 @@ function WSMessage(evt) {
   }
 
   if (inputtext === '{"VehicleTest":"Light"}') {
-    doTestLight(evt.data);
+    doTestLight(eData);
     return;
   }
 
+  if (inputtext === '{"VehicleTest":"CadenceSensor"}') {
+    CadenceSensorCheck(eData)
+    return;
+  }
 
   //Part B 啟動AutoSend
   myTimer = setInterval(AutoSend, 2000)
 
   if (inputtext == '{"OnlyRead":"Display"}') {
-    wsi.close()
-    JsonParser_Display(evt.data)
-
+    DLmsg.close()
+    JsonParser_Display(eData)
   }
   if (inputtext == '{"Read":"Display"}') {
-    wsi.close()
-    JsonParser_Display(evt.data)
+    DLmsg.close()
+    JsonParser_Display(eData)
     setCookie('ckIsReadDP', 'True')
   }
-  if (evt.data === '{"WriteCustomize":"Finish"}') {
-    wsi.close();
+  if (eData === '{"WriteCustomize":"Finish"}') {
+    DLmsg.close();
   }
   if (inputtext === '{"TestHistory":"None"}') {
-    wsi.close()
-    JsonParser_TestHistory(evt.data)
+    DLmsg.close()
+    JsonParser_TestHistory(eData)
+  }
+  if (inputtext === '{"VehicleTest":"BT"}') {
+    TestBTEnd(eData);
+  }
+  if (inputtext === '{"VehicleTest":"Driver"}') {
+    TestDriverEnd(eData);
+  }
+  if (inputtext === '{"VehicleTest":"Motor"}') {
+    TestMotorEnd(eData);
+  }
+  if (inputtext === '{"VehicleTest":"Battery"}') {
+    TestBatteryEnd(eData);
+  }
+  if (inputtext === '{"VehicleTest":"SpeedSensor"}') {
+    TestSpeedSensorEnd(eData);
   }
 
 }
+
+
+
+
 function doTestLightFinish(param) {
 
   // $("#test2").attr("disabled", false);
-  wsi.close()
+  DLmsg.close()
   myTimer = setInterval(AutoSend, 2000)
   $('#TestLight').html(param)
-  wsiMsg('Test Light : Finish');
+  // DLmsg.setMsg('Test Light : Finish');
 }
 function doTestLight(param) {
   var jsonObj = JSON.parse(param);
@@ -254,7 +294,7 @@ function doTestLight(param) {
 
   if (res === 'Pass') {
     TLCount++;
-    wsiMsg('Test Light : ' + TLCount);
+    DLmsg.setMsg('Test Light : ' + TLCount);
     setTimeout(TestLight, 1000);
     return true;
   }
@@ -283,7 +323,7 @@ function doDisconnect() {
 }
 
 function WebSocketCheck(callback_pass, callback_fail) {
-  wsiMsg('Check browser support ws');
+  DLmsg.setMsg('Check browser support ws');
   if ("WebSocket" in window) {
     (callback_pass && typeof (callback_pass) === "function") && callback_pass();
   }

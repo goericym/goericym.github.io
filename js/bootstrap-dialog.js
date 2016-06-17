@@ -885,7 +885,17 @@
          */
         enhanceButton: function ($button) {
             $button.dialog = this;
-
+            //eric add hide
+            $button.h = function () {
+                var $this = this;
+                $this.hide();
+                return $this;
+            };
+            $button.s = function () {
+                var $this = this;
+                $this.show();
+                return $this;
+            };
             // Enable / Disable
             $button.toggleEnable = function (enable) {
                 var $this = this;
