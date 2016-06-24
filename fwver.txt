@@ -1,0 +1,8 @@
+{
+"ConsoleVer": 20160606,
+"DisplayVer": 20160427,
+"DriverVer" : 20160607,
+"Console": "fw/Hippo_Console_20160606_APP.txt",
+"Display": "fw/Hippo_Display_20160427_APP.txt",
+"Driver" : "Hippo_Driver_20160607_ETH_1607_APP.txt"
+ }
