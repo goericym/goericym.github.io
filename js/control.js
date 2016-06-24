@@ -9,7 +9,7 @@ function tshowDiv(id) {
     }
 }
 
-var ID_arr = ['Info_tabs', 'SWUpgrade', 'Cust_tabs', 'VehicleTest', 'TestRecode', 'Print'];
+var ID_arr = ['Info_tabs', 'SWUpgrade', 'Cust_tabs', 'VehicleTest', 'TestRecode', 'Print', 'SWUpgradeMsgBox'];
 function showDiv(idname) {
     for (i = 0; i < ID_arr.length; i++) {
         var value = ID_arr[i];
@@ -83,45 +83,98 @@ function Wait(millisecondi) {
 
 
 
+function VTD_P1_OK() {
+    DLbtnChk.close()
+    DLbtnChk.DLinit('LCD Segment Scan Correct?');
+    DLbtnChk.open()
+    DLbtnChk.btnOKAction(VTD_P2_OK);
+    DLbtnChk.btnNGAction(VTD_P2_NG);
+    DLbtnChk.btnDisable()
+    setTimeout(function () {
+        DLbtnChk.btbEnable()
+    }, 2000);
+    $('#TestDisplay').html('Testing');
+    ManuallySendCmd('{"VehicleTest":"Display_Part2"}');
+}
+function VTD_P1_NG() {
+    $('#TestDisplay').html('Fail');
+    ManuallySendCmd('{"VehicleTest":"Display_Part1_NG"}');
+    DLbtnChk.close()
+}
+function VTD_P2_OK() {
+    DLbtnChk.close()
+    DLbtn.DLinit('<table class="table table-striped"><tr><td>Down</td><td id="tid0">Please Press</td></tr><tr><td>Up</td><td id="tid1">Please Press</td></tr><tr><td>Light</td><td id="tid2">Please Press</td></tr><tr><td>Info</td><td id="tid3">Please Press</td></tr></table>');
+    DLbtn.open()
+    DLbtn.btnAction(VTD_P3_OK);
+    DLbtn.btnDisable();
+    DLbtn.btnLabel('OK(45)');
+    ManuallySendCmd('{"VehicleTest":"Display_Part3"}');
+
+}
+function VTD_P3_OK() {
+    DLbtn.close()
+}
+function Display_Part3Check(param) {
+    var jsonObj = JSON.parse(param);
+    var i = jsonObj.VTD_Button
+    if (typeof i != 'undefined') {
+        $('#tid' + i).html('Detected');
+    }
+    if (typeof jsonObj.VTD_Timer != 'undefined') {
+        var countdown = 45 - jsonObj.VTD_Timer
+        DLbtn.btnLabel('OK(' + countdown + ')')
+    }
+
+    var res = jsonObj.VTD_Result
+    if (res === 'Pass' || res === 'Fail') {
+        DLbtn.btbEnable();
+        DLbtn.btnLabel('OK')
+        myTimer = setInterval(AutoSend, 2000)
+        $('#TestDisplay').html(res);
+    }
+
+
+}
+function VTD_P2_NG() {
+    $('#TestDisplay').html('Fail');
+    ManuallySendCmd('{"VehicleTest":"Display_Part2_NG"}');
+    DLbtnChk.close()
+}
 function TestDisplay() {
-    $('#TestDisplay').html('Testing-40%');
+    DLbtnChk.DLinit('LCD Panel All ON/OFF Correct?');
+    DLbtnChk.open()
+    DLbtnChk.btnOKAction(VTD_P1_OK);
+    DLbtnChk.btnNGAction(VTD_P1_NG);
+    DLbtnChk.btnDisable()
+    setTimeout(function () {
+        DLbtnChk.btbEnable()
+    }, 2000);
+    $('#TestDisplay').html('Testing');
+    ManuallySendCmd('{"VehicleTest":"Display_Part1"}');
+}
 
-    ManuallySendCmd('{"VehicleTest":"Display"}');
-
-    var TD1 = new DialogClass();
-    TD1.html = 'LCD Panel All ON/OFF Corrnet?';
-    TD1.title = 'Display Test (1/3)';
-    TD1.start(TestDisplay2, '#TestDisplay', 'Testing-60%');
-
-
+function TestDisplay1End(param) {
+    DLbtnChk.close()
+    var jsonObj = JSON.parse(param);
+    $('#TestDisplay').html(jsonObj.VTD_LCD_PNL_On);
+}
+function TestDisplay2End(param) {
+    DLbtnChk.close()
+    var jsonObj = JSON.parse(param);
+    $('#TestDisplay').html(jsonObj.VTD_LCD_PNL_Off);
 }
 function TestDisplay2() {
-    ManuallySend();
-    var TD2 = new DialogClass();
-    TD2.html = 'LCD Segment Scan Corrnet?';
-    TD2.title = 'Display Test (2/3)';
-    TD2.start(TestDisplay3, '#TestDisplay', 'Testing-80%');
-
-
+    ManuallySendCmd('{"VehicleTest":"Display2"}');
 }
+
 function TestDisplay3() {
-    ManuallySend();
-    // html = '<button id="btn-test" class="btn btn-success">Revert button status right now.</button></div>';
-    html = '<span id="btn-test">Revert button status right now.</span></div>';
-    var TD3 = new DialogEspeciallyClass();
-    TD3.html = '<span id="btn-test">Revert button status right now.</span></div>';
-    TD3.title = 'Display Test (3/3)';
-
-    chekcw = false;
-    //Wait(1000);//test do something
-    TD3.start();
-
+    ManuallySendCmd('{"VehicleTest":"Display"}');
 }
 function TestLight(param) {
     if (typeof param != 'undefined') {
         // $("#test2").attr("disabled", true);
         TLCount = 0;
-        DLmsg.setMsg('Test Light start');
+        DLmsg.DLinit('Test Light start');
         DLmsg.open();
         $('#TestLight').html('testing');
     }
@@ -129,18 +182,8 @@ function TestLight(param) {
 }
 
 
-function showStatus_fun(param1, param2) {
-    // console.log('call')
-    // console.log(param1[tc])
-    $(param2).html(param1[2])
-    // if (tc > 3) {
-    return true
-    // } else {
-    //     return false
-    // }
-}
 function TestDriver() {
-    DLmsg.setMsg('Test Driver');
+    DLmsg.DLinit('Test Driver');
     DLmsg.open()
     $('#TestDriver').html('Testing');
     ManuallySendCmd('{"VehicleTest":"Driver"}');
@@ -152,8 +195,11 @@ function TestDriverEnd(param) {
     $('#TestDriver').html(jsonObj.VehicleTestDriver);
 }
 function TestCadenceSensor() {
-    DLmsg.setMsg('VehicleTest TestCadenceSensor');
-    DLmsg.open()
+    DLbtn.DLinit('VehicleTest TestCadenceSensor');
+    DLbtn.open();
+    DLbtn.btnDisable();
+    DLbtn.btnAction(btnClose);
+    DLbtn.btnLabel('OK(30)');
     $('#TestCadenceSensor').html('Testing');
     ManuallySendCmd('{"VehicleTest":"CadenceSensor"}');
 
@@ -161,25 +207,27 @@ function TestCadenceSensor() {
 function CadenceSensorCheck(param) {
     var jsonObj = JSON.parse(param);
     if (typeof jsonObj.RPM != 'undefined') {
-        DLmsg.setMsg('Please Roll the Crank ! RPM :' + jsonObj.RPM + ', Count : ' + jsonObj.Count + '<button id="wsiBtn" type="button" onclick="wsiclose()">OK</button>');
-        $('#wsiBtn').hide();
+        DLbtn.setMsg('Please Roll the Crank ! RPM :' + jsonObj.RPM);
+        var countdown = 30 - jsonObj.Count
+        DLbtn.btnLabel('OK(' + countdown + ')')
     }
 
-    if (jsonObj.TestMaxRPM === 'Pass') {
+    if (jsonObj.TestMaxRPM === 'Pass' || jsonObj.TestMaxRPM === 'Fail') {
         myTimer = setInterval(AutoSend, 2000);
-        $('#wsiBtn').show();
-    }
-    if (jsonObj.TestMaxRPM === 'Fail') {
-        myTimer = setInterval(AutoSend, 2000);
-        DLmsg.close();
+        DLbtn.btbEnable();
+        $('#TestCadenceSensor').html(jsonObj.TestMaxRPM);
+        DLbtn.btnLabel('OK')
     }
 
+
 }
-function wsiclose() {
-    DLmsg.close();
+function btnClose() {
+    DLbtn.close();
 }
+
 function TestSpeedSensor() {
-    DLmsg.setMsg('VehicleTest TestSpeedSensor');
+
+    DLmsg.DLinit('VehicleTest TestSpeedSensor');
     DLmsg.open()
     $('#TestSpeedSensor').html('Testing');
     ManuallySendCmd('{"VehicleTest":"SpeedSensor"}');
@@ -188,10 +236,10 @@ function TestSpeedSensor() {
 function TestSpeedSensorEnd(param) {
     DLmsg.close()
     var jsonObj = JSON.parse(param);
-    $('#TestMotor').html(jsonObj.VehicleTestSpeedSensor);
+    $('#TestSpeedSensor').html(jsonObj.VehicleTestSpeedSensor);
 }
 function TestMotor() {
-    DLmsg.setMsg('VehicleTest Motor');
+    DLmsg.DLinit('VehicleTest Motor');
     DLmsg.open()
     $('#TestMotor').html('Testing');
     ManuallySendCmd('{"VehicleTest":"Motor"}');
@@ -203,7 +251,7 @@ function TestMotorEnd(param) {
     $('#TestMotor').html(jsonObj.VehicleTestMotor);
 }
 function TestBattery() {
-    DLmsg.setMsg('VehicleTest Battery');
+    DLmsg.DLinit('VehicleTest Battery');
     DLmsg.open()
     $('#TestBattery').html('Testing');
     ManuallySendCmd('{"VehicleTest":"Battery"}');
@@ -257,6 +305,7 @@ function CustomizeApply() {
     var jstr = CustomizeData();
     // console.log(jstr);
     ManuallySendCmd(jstr);
+
     DLmsg.setMsg('Write please wait');
     DLmsg.open();
 }
@@ -326,26 +375,81 @@ function timeConverter(UNIX_timestamp) {
     var time = year + '-' + month + '-' + date + ' ' + hour + ':' + min + ':' + sec;
     return time;
 }
-function UpgradeFW() {
-    // v = '{"DownloadFW":"None"}'
+var fw_str = '';
+function Upgrade_FW(param) {
+    fw_str = param;
+
     var valeur = 0;
-    $('#bar1').hide();
-    $('#GFW').attr("disabled", true);
-    setTimeout(function () {
-        $('#bar1').css('width', valeur + '%').attr('aria-valuenow', valeur);
-    }, 0);
 
+    $('[id=bar_' + fw_str + '_FW]').hide();
+    $('#btn_' + fw_str + '_FW').attr("disabled", true);
+    $('[id=bar_' + fw_str + '_FW]').css('width', valeur + '%').attr('aria-valuenow', valeur);
+    var fwcmd = ''
+    if (fw_str === 'Console') {
+        fwcmd = '{"UpgradeFW":"Display;http://goericym.github.io/fw/Hippo_Console_20160606_APP.txt;002"}'
+    } else if (fw_str === 'LCD_Display') {
+        fwcmd = '{"UpgradeFW":"Panel;http://goericym.github.io/fw/Hippo_Display_20160427_APP.txt;002"}'
+    } else if (fw_str === 'Driver') {
+        fwcmd = '{"UpgradeFW":"Driver;http://goericym.github.io/fw/Hippo_Driver_20160607_ETH_1607_APP.txt;002"}'
+    }
+    console.log(fwcmd)
     setTimeout(function () {
-        $('#bar1').show();
-        ManuallySendProgressBar('{"DownloadFW":"http://127.0.0.1:9001/1MBfile;filename"}');
-    }, 100);
+        $('[id=bar_' + fw_str + '_FW]').show();
+        // ManuallySendProgressBar('{"DownloadFW":"http://goericym.github.io/Display_20160426.txt;Display_FW.txt"}');
+        ManuallySendProgressBar(fwcmd);
+    }, 300);
 
+}
+function UpgradeFWCheck(param) {
+    var jsonObj = JSON.parse(param);
+    console.log(jsonObj);
+
+    var valeur = jsonObj.UpgradeFW;
+    console.log('v:' + valeur)
+
+    $('[id=bar_' + fw_str + '_FW]').css('width', valeur + '%').attr('aria-valuenow', valeur);
+    $('[id=bar_Upgrade]').css('width', valeur + '%').attr('aria-valuenow', valeur);
+    if (param === '{"UpgradeFW":"Finish"}') {
+        //一問多答結束
+        myTimer = setInterval(AutoSend, 2000)
+        $('#btn_' + fw_str + '_FW').attr("disabled", false);
+        DLbtn.btbEnable();
+        fw_str = '';
+    }
+}
+function UpgradeMsg() {
+
+
+    var MsgHtml = $('#SWUpgradeMsgBox').html()
+    var Msg = $('<div></div>').append(MsgHtml)
+
+    console.log(Msg);
+    DLbtn.DLinit('init');
+    DLbtn.setMsg(Msg);
+    DLbtn.btnOnHide(bar_Upgrade_Show(0));
+    DLbtn.open();
+    DLbtn.btnAction(btnClose);
+
+    DLbtn.btnDisable();
 
 
 
 }
 
+function bar_Upgrade_Show(param) {
+    var valeur = param;
+    console.log(param);
+    $('[id=bar_Upgrade]').hide()
+    $('[id=bar_Upgrade]').css('width', valeur + '%').attr('aria-valuenow', valeur);
+    setTimeout(function () {
+        $('[id=bar_Upgrade]').show()
+        $('[id=bar_Upgrade]').css('width', valeur + '%').attr('aria-valuenow', valeur);
+    }, 500);
+
+}
+
 function DoInfo() {
+    DLmsg.DLinit('');
     DLmsg.setMsg('Get information please wait');
     DLmsg.open();
     ManuallySendCmd('{"Read":"Display"}');
@@ -353,6 +457,7 @@ function DoInfo() {
 }
 
 function DoTestRecode() {
+    DLmsg.DLinit('');
     DLmsg.setMsg('Get TestHistory please wait');
     DLmsg.open();
     ManuallySendCmd('{"TestHistory":"None"}');
@@ -361,6 +466,7 @@ function DoTestRecode() {
 function DoCust() {
     var isReadDisplay = getCookie('ckIsReadDP');
     if (isReadDisplay !== 'True') {
+        DLmsg.DLinit('');
         DLmsg.setMsg('Get Customization please wait');
         DLmsg.open();
         ManuallySendCmd('{"Read":"Display"}');
@@ -375,6 +481,7 @@ function DoPNL_MAN_DIST() {
 
 }
 function TestBT() {
+    DLmsg.DLinit('');
     DLmsg.setMsg('test bt');
     DLmsg.open();
     $('#TestBT').html('Testing');
@@ -389,15 +496,65 @@ function TestBTEnd(param) {
 
 
 function testbtn() {
-    var n = new Date();
-    DLmsg.setMsg(n);
-    DLmsg.open();
-    setTimeout(function () { DLmsg.close(); }, 2000);
+    // ManuallySendCmd('{"GetFWVer":""}');
+    // ManuallySendCmd('{"UpgradeFW":"Display;Display_20160426.txt;566"}');
+    //$get 可以改成其他網頁路徑API(只要是吐出json 格式就好)
+    // $.get("../../fwver.txt", function (data) {
+    //     var jsonObj = JSON.parse(data);
+    //     console.log(jsonObj)
+    //     alert(jsonObj.ConsoleVer);
+    // });
+    var MsgHtml = $('#SWUpgradeMsgBox').html()
+    var Msg = $('<div></div>').append(MsgHtml)
+
+
+    DLbtn.DLinit('init');
+    DLbtn.setMsg(Msg);
+    DLbtn.btnOnShow(bar_Upgrade_Show(0));
+    DLbtn.btnOnHide(bar_Upgrade_Show(0));
+    DLbtn.open();
+    DLbtn.btnAction(btnClose);
+
+
+
 }
 
 function testbtn1() {
-    var n = new Date();
-    DLbtn.setMsg(n);
+    var MsgHtml = $('#SWUpgradeMsgBox').html()
+    var Msg = $('<div></div>').append(MsgHtml)
+
+
+    DLbtn.DLinit('init');
+    DLbtn.setMsg(Msg);
+    DLbtn.btnOnShow(bar_Upgrade_Show(50));
+    DLbtn.btnOnHide(bar_Upgrade_Show(0));
     DLbtn.open();
-    DLbtn.btnAction(bttt)
+    DLbtn.btnAction(btnClose);
+
 }
+
+function DoCheckFW() {
+    //1.先去抓clinet的版本
+    ManuallySendCmd('{"GetFWVer":""}');
+}
+function DoCheckFWPart1(param) {
+    var client_jsonObj = JSON.parse(param);
+    //$get 可以改成其他網頁路徑API(只要是吐出json 格式就好)
+    $.get("../../fwver.txt", function (data) {
+        var server_jsonObj = JSON.parse(data);
+        console.log(server_jsonObj.ConsoleVer);
+        console.log(client_jsonObj.ConsoleVer);
+        var s1 = server_jsonObj.ConsoleVer
+        var c1 = client_jsonObj.ConsoleVer
+        if (s1 > c1) {
+            // alert('gggg')
+            $('#id_Console_FW').show();
+        }
+
+
+    });
+
+}
+// $('#id_Console_FW').hide();
+// $('#id_Display_FW').hide();
+// $('#id_Driver_FW').hide();

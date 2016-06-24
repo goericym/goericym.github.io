@@ -1,40 +1,31 @@
 //JQuery
 //The hash (#) specifies to select elements by their ID's 
 //The dot (.) specifies to select elements by their classname
-window.addEventListener("load", init1, false);//載入時會呼叫init的function
+window.addEventListener("load", init, false);//載入時會呼叫init的function
 // Globa變數都放在這
-var DLmsg;
-var DLbtn;
+var DLmsg = new DialogMsg();;
+var DLbtn = new DialogBtnOk();
+var DLbtnChk = new DialogBtnConfirm();
 var reloadCount = 0;
 var inputtext = '';
 var myTimer;
 var TLCount = 0;
 function init1() {
 
-  DLmsg = new DialogMsg();
-  DLmsg.dlinit('init');
-  DLmsg.open();
-  DLbtn = new DialogBtn();
-  DLbtn.dlinit('init');
-  DLmsg.close()
-  DLbtn.open()
-  DLbtn.btnAction(bttt)
-  setTimeout(function () { DLbtn.btbEnable(); }, 2000);
-}
-function bttt(){
-  var n = new Date();
 
-  console.log('bttt : '+ n)
-  alert('hi');
-  DLbtn.close();
+  // DLmsg.DLinit('init');
+  // DLmsg.open();
+
+  // // setTimeout(function () { DLmsg.setMsg('2222');; }, 2000);
+  // setTimeout(function () { DLmsg.close(); }, 1000);
+
 }
+
 function init() {
 
-  DLmsg = new DialogMsg();
-  DLmsg.dlinit('init');
+  DLmsg.DLinit('init');
   DLmsg.open();
-  DLbtn = new DialogBtn();
-  DLbtn.dlinit('init');
+
   // setTimeout(function () { DLmsg.setMsg('haha'); }, 2000);
   setInterval(ErrorCount, 1000)
   //step1 :先做browser檢查
@@ -42,7 +33,7 @@ function init() {
 }
 function ErrorCount() {
   reloadCount++;
-  console.log(reloadCount)
+  console.log('ErrorCount : ' + reloadCount)
   if (reloadCount > 10) {
     console.log('error')
   }
@@ -212,17 +203,8 @@ function WSMessage(evt) {
     return;
   }
 
-  if (inputtext.indexOf('DownloadFW') > 0) {
-    var jsonObj = JSON.parse(eData);
-    console.log(jsonObj);
-
-    var valeur = jsonObj.DownloadFWProgressBar;
-    $('#bar1').css('width', valeur + '%').attr('aria-valuenow', valeur);
-    if (eData === '{"DownloadFWProgressBar":"Finish"}') {
-      //一問多答結束
-      myTimer = setInterval(AutoSend, 2000)
-      $('#GFW').attr("disabled", false);
-    }
+  if (inputtext.indexOf('UpgradeFW') > 0) {
+    UpgradeFWCheck(eData)
     return;
   }
 
@@ -233,6 +215,10 @@ function WSMessage(evt) {
 
   if (inputtext === '{"VehicleTest":"CadenceSensor"}') {
     CadenceSensorCheck(eData)
+    return;
+  }
+  if (inputtext === '{"VehicleTest":"Display_Part3"}') {
+    Display_Part3Check(eData)
     return;
   }
 
@@ -271,6 +257,12 @@ function WSMessage(evt) {
     TestSpeedSensorEnd(eData);
   }
 
+  if (inputtext === '{"GetFWVer":""}') {
+    DoCheckFWPart1(eData);
+  }
+  // if (inputtext === '{"VehicleTest":"Display_Part2"}') {
+  //   TestDisplay2End(eData);
+  // }
 }
 
 

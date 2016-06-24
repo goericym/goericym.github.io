@@ -1,8 +1,7 @@
- 
 function DialogMsg() {
     var dialog;
-    var isOpen = false;
-    this.dlinit = function (param) {
+
+    this.DLinit = function (param) {
         dialog = new BootstrapDialog({
             type: BootstrapDialog.TYPE_SUCCESS,
             closable: false,
@@ -15,21 +14,11 @@ function DialogMsg() {
     };
 
     this.open = function () {
-        // console.log(isOpen);
-        if (isOpen === false) {
-            isOpen = true;
-
-            dialog.open();
-        }
+        dialog.open();
     }
     this.close = function () {
-        // console.log(isOpen);
-        if (isOpen === true) {
-            isOpen = false;
-            // setTimeout(function () { dialog.close(); }, 500);
-            dialog.close();
-        }
-
+        //     // setTimeout(function () { dialog.close(); }, 500);
+        dialog.close();
     }
     this.setMsg = function (param) {
         dialog.setMessage(param);
@@ -37,10 +26,9 @@ function DialogMsg() {
 
 
 }
-function DialogBtn() {
+function DialogBtnOk() {
     var dialog;
-    var isOpen = false;
-    this.dlinit = function (param) {
+    this.DLinit = function (param) {
         dialog = new BootstrapDialog({
             type: BootstrapDialog.TYPE_SUCCESS,
             closable: false,
@@ -57,21 +45,11 @@ function DialogBtn() {
     };
 
     this.open = function () {
-        // console.log(isOpen);
-        if (isOpen === false) {
-            isOpen = true;
-
-            dialog.open();
-        }
+        dialog.open();
     }
     this.close = function () {
-        // console.log(isOpen);
-        if (isOpen === true) {
-            isOpen = false;
-            // setTimeout(function () { dialog.close(); }, 500);
-            dialog.close();
-        }
-
+        // setTimeout(function () { dialog.close(); }, 500);
+        dialog.close();
     }
     this.setMsg = function (param) {
         dialog.setMessage(param);
@@ -80,15 +58,17 @@ function DialogBtn() {
     this.btnDisable = function (param) {
         var btn = dialog.getButton('btnOk');
         btn.disable();
-        btn.spin();
+        // btn.spin();
     }
     this.btbEnable = function (param) {
         var btn = dialog.getButton('btnOk');
         btn.enable();
-        btn.stopSpin();
+        // btn.stopSpin();
     }
     this.btnLabel = function (param) {
-        $('#btnOk').html(param);
+        setTimeout(function () {
+            $('#btnOk').html(param);
+        }, 300)
     }
     this.btnAction = function (callback_fun) {
         var btn = dialog.getButton('btnOk');
@@ -97,6 +77,77 @@ function DialogBtn() {
             (callback_fun && typeof (callback_fun) === "function") && callback_fun();
         });
     }
-
+    this.btnOnShow = function (callback_fun) {
+        dialog.onShown(callback_fun)
+        
+    }
+    this.btnOnHide = function (callback_fun) {
+        dialog.onHide(callback_fun)
+    }
 }
+function DialogBtnConfirm() {
+    var dialog;
+    this.DLinit = function (param) {
+        dialog = new BootstrapDialog({
+            type: BootstrapDialog.TYPE_SUCCESS,
+            closable: false,
+            closeByBackdrop: false,
+            closeByKeyboard: false,
+            title: 'Message',
+            message: param,
+            buttons: [
+                {
+                    id: 'btnOk',
+                    label: 'Pass'
+                }, {
+                    id: 'btnCancel',
+                    label: 'Fail'
+                }
+            ]
+        }
+        );
+    };
 
+    this.open = function () {
+        dialog.open();
+    }
+    this.close = function () {
+        // setTimeout(function () { dialog.close(); }, 500);
+        dialog.close();
+    }
+    this.setMsg = function (param) {
+        dialog.setMessage(param);
+    }
+
+    this.btnDisable = function (param) {
+        var btnOK = dialog.getButton('btnOk');
+        btnOK.disable();
+        var btnNG = dialog.getButton('btnCancel');
+        btnNG.disable();
+    }
+    this.btbEnable = function (param) {
+        var btnOK = dialog.getButton('btnOk');
+        btnOK.enable();
+        var btnNG = dialog.getButton('btnCancel');
+        btnNG.enable();
+    }
+    this.btnLabel = function (param) {
+        setTimeout(function () {
+            $('#btnOk').html(param);
+        }, 300)
+    }
+    this.btnOKAction = function (callback_fun) {
+        var btn = dialog.getButton('btnOk');
+        btn.unbind();//把事件清除
+        btn.click(function () {
+            (callback_fun && typeof (callback_fun) === "function") && callback_fun();
+        });
+    }
+    this.btnNGAction = function (callback_fun) {
+        var btn = dialog.getButton('btnCancel');
+        btn.unbind();//把事件清除
+        btn.click(function () {
+            (callback_fun && typeof (callback_fun) === "function") && callback_fun();
+        });
+    }
+}
