@@ -13,7 +13,7 @@ var ID_arr = ['Info_tabs', 'SWUpgrade', 'Cust_tabs', 'VehicleTest', 'TestRecode'
 function showDiv(idname) {
     for (i = 0; i < ID_arr.length; i++) {
         var value = ID_arr[i];
-        if (idname == value) {
+        if (idname === value) {
             document.getElementById(value).style.display = "block";
         }
         else {
@@ -452,7 +452,7 @@ function DoInfo() {
     DLmsg.DLinit('');
     DLmsg.setMsg('Get information please wait');
     DLmsg.open();
-    ManuallySendCmd('{"Read":"Display"}');
+    ManuallySendCmd('{"Read":"All"}');
 
 }
 

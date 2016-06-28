@@ -222,6 +222,17 @@ function WSMessage(evt) {
     return;
   }
 
+  if (inputtext === '{"Read":"All"}') {
+    DLmsg.close()
+    JsonParser_Display(eData)
+    JsonParser_Driver(eData)
+    // JsonParser_Battery(eData)
+    setCookie('ckIsReadDP', 'True')
+    if (eData === '{"Read":"Pass"}') {
+      myTimer = setInterval(AutoSend, 2000)// read all 由這裡來啟動timer
+    }
+    return;
+  }
   //Part B 啟動AutoSend
   myTimer = setInterval(AutoSend, 2000)
 
@@ -234,6 +245,7 @@ function WSMessage(evt) {
     JsonParser_Display(eData)
     setCookie('ckIsReadDP', 'True')
   }
+
   if (eData === '{"WriteCustomize":"Finish"}') {
     DLmsg.close();
   }
@@ -344,16 +356,39 @@ function JsonParser_TestHistory(params) {
   //  console.log(jsonObj)
   Mapping(jsonObj);
 }
+function JsonParser_Driver(params) {
+  var jsonObj = JSON.parse(params);
+  if (jsonObj[0] === 'Driver') {
+    Mapping_Driver(jsonObj[1]);
+  }
+}
 function JsonParser_Display(params) {
   var jsonObj = JSON.parse(params);
   // console.log(jsonObj);
-  // console.log(jsonObj[0]);
+  console.log(jsonObj[0]);
   // console.log(jsonObj[1].ERR_REC_MISC);
   // console.log(jsonObj[1].PNL_MAN_DIST);
   // console.log(jsonObj[1].PRD_LMOD_DATE);
   // console.log(timeConverter(jsonObj[1].PRD_LMOD_DATE));
-  Mapping(jsonObj[1]);
+  if (jsonObj[0] === 'Display') {
+    Mapping(jsonObj[1]);
 
+  }
+
+
+}
+function Mapping_Driver(params) {
+  var sKey, sValue;
+  for (sKey in params) {
+    sValue = params[sKey];
+    try {
+      // console.log(sKey + ' : ' + sValue)
+      var id = '[id=Driver_' + sKey + ']';//所有ID都會被更新
+      $(id).html(sValue);
+    } catch (error) {
+      console.log(sKey + ' ' + error);
+    }
+  }
 }
 function Mapping(params) {
   var sKey, sValue;
