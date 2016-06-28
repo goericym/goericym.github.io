@@ -50,37 +50,6 @@ $(document).ready(function () {
 
 
 
-function Delay(millisecondi) {
-    var now = new Date();
-    var exitTime = now.getTime() + millisecondi;
-
-    while (true) {
-        now = new Date();
-
-        if (now.getTime() > exitTime) return;
-    }
-}
-
-
-function Wait(millisecondi) {
-    var now = new Date();
-    var exitTime = now.getTime() + millisecondi;
-    var refreshIntervalId = setInterval(function () {
-        todo();
-    }, 100);
-
-    var todo = function () {
-        now = new Date();
-        // console.log(now.getTime() + ':' + exitTime);
-        if (now.getTime() > exitTime) {
-            // console.log(now);
-            clearInterval(refreshIntervalId);
-            $('#TestDisplay').html('Testing-100%');
-            chekcw = true;
-        }
-    };
-}
-
 
 
 function VTD_P1_OK() {
@@ -98,6 +67,9 @@ function VTD_P1_OK() {
 }
 function VTD_P1_NG() {
     $('#TestDisplay').html('Fail');
+    var res = 'ErrorCode_0100.pdf'
+    $('#TestDisplay_ErrorCode').html(res);
+    $('#TestDisplay_ErrorCode').attr('onclick', "PDFFile('" + res + "')");
     ManuallySendCmd('{"VehicleTest":"Display_Part1_NG"}');
     DLbtnChk.close()
 }
@@ -117,6 +89,7 @@ function VTD_P3_OK() {
 function Display_Part3Check(param) {
     var jsonObj = JSON.parse(param);
     var i = jsonObj.VTD_Button
+
     if (typeof i != 'undefined') {
         $('#tid' + i).html('Detected');
     }
@@ -132,6 +105,11 @@ function Display_Part3Check(param) {
         myTimer = setInterval(AutoSend, 2000)
         $('#TestDisplay').html(res);
     }
+    if (res === 'Fail') {
+        var res = 'ErrorCode_0098.pdf'
+        $('#TestDisplay_ErrorCode').html(res);
+        $('#TestDisplay_ErrorCode').attr('onclick', "PDFFile('" + res + "')");
+    }
 
 
 }
@@ -139,6 +117,9 @@ function VTD_P2_NG() {
     $('#TestDisplay').html('Fail');
     ManuallySendCmd('{"VehicleTest":"Display_Part2_NG"}');
     DLbtnChk.close()
+    var res = 'ErrorCode_0100.pdf'
+    $('#TestDisplay_ErrorCode').html(res);
+    $('#TestDisplay_ErrorCode').attr('onclick', "PDFFile('" + res + "')");
 }
 function TestDisplay() {
     DLbtnChk.DLinit('LCD Panel All ON/OFF Correct?');
@@ -149,7 +130,9 @@ function TestDisplay() {
     setTimeout(function () {
         DLbtnChk.btbEnable()
     }, 2000);
+    $('#TestDisplay_ErrorCode').html('');
     $('#TestDisplay').html('Testing');
+
     ManuallySendCmd('{"VehicleTest":"Display_Part1"}');
 }
 
@@ -176,11 +159,46 @@ function TestLight(param) {
         TLCount = 0;
         DLmsg.DLinit('Test Light start');
         DLmsg.open();
-        $('#TestLight').html('testing');
+        $('#TestLight_ErrorCode').html('');
+        $('#TestLight').html('Testing');
     }
     ManuallySendCmd('{"VehicleTest":"Light"}');
 }
 
+function doTestLight(param) {
+  var jsonObj = JSON.parse(param);
+  var res = jsonObj.VehicleTestLight;
+  if (TLCount >= 3) {
+    doTestLightFinish(res);
+    return true;
+  }
+
+  if (res === 'Pass') {
+    TLCount++;
+    DLmsg.setMsg('Test Light : ' + TLCount);
+    setTimeout(TestLight, 1000);
+    return true;
+  }
+  else {
+    doTestLightFinish(res);
+    return false;
+  }
+}
+function doTestLightFinish(param) {
+
+  // $("#test2").attr("disabled", false);
+  DLmsg.close()
+  myTimer = setInterval(AutoSend, 2000)
+  if (param === 'Pass') {
+    $('#TestLight').html('Pass')
+  } else {
+    $('#TestLight').html('Fail')
+    $('#TestLight_ErrorCode').html(param);
+    $('#TestLight_ErrorCode').attr('onclick', "PDFFile('" + param + "')");
+  }
+
+  // DLmsg.setMsg('Test Light : Finish');
+}
 
 function TestDriver() {
     DLmsg.DLinit('Test Driver');
@@ -192,7 +210,14 @@ function TestDriver() {
 function TestDriverEnd(param) {
     DLmsg.close()
     var jsonObj = JSON.parse(param);
-    $('#TestDriver').html(jsonObj.VehicleTestDriver);
+    var res = jsonObj.VehicleTestDriver
+    if (res === 'Pass') {
+        $('#TestDriver').html('Pass');
+    } else {
+        $('#TestDriver').html('Fail');
+        $('#TestDriver_ErrorCode').html(res);
+        $('#TestDriver_ErrorCode').attr('onclick', "PDFFile('" + res + "')");
+    }
 }
 function TestCadenceSensor() {
     DLbtn.DLinit('VehicleTest TestCadenceSensor');
@@ -201,6 +226,7 @@ function TestCadenceSensor() {
     DLbtn.btnAction(btnClose);
     DLbtn.btnLabel('OK(30)');
     $('#TestCadenceSensor').html('Testing');
+    $('#TestCadenceSensor_ErrorCode').html('');
     ManuallySendCmd('{"VehicleTest":"CadenceSensor"}');
 
 }
@@ -208,15 +234,22 @@ function CadenceSensorCheck(param) {
     var jsonObj = JSON.parse(param);
     if (typeof jsonObj.RPM != 'undefined') {
         DLbtn.setMsg('Please Roll the Crank ! RPM :' + jsonObj.RPM);
-        var countdown = 30 - jsonObj.Count
-        DLbtn.btnLabel('OK(' + countdown + ')')
+        var countdown = 30 - jsonObj.Count;
+        DLbtn.btnLabel('OK(' + countdown + ')');
     }
 
     if (jsonObj.TestMaxRPM === 'Pass' || jsonObj.TestMaxRPM === 'Fail') {
         myTimer = setInterval(AutoSend, 2000);
         DLbtn.btbEnable();
         $('#TestCadenceSensor').html(jsonObj.TestMaxRPM);
-        DLbtn.btnLabel('OK')
+        DLbtn.btnLabel('OK');
+    }
+
+    if (jsonObj.TestMaxRPM === 'Fail') {
+        $('#TestCadenceSensor').html('Fail');
+        var res = 'ErrorCode_0049.pdf';
+        $('#TestCadenceSensor_ErrorCode').html(res);
+        $('#TestCadenceSensor_ErrorCode').attr('onclick', "PDFFile('" + res + "')");
     }
 
 
@@ -230,36 +263,61 @@ function TestSpeedSensor() {
     DLmsg.DLinit('VehicleTest TestSpeedSensor');
     DLmsg.open()
     $('#TestSpeedSensor').html('Testing');
+    $('#TestSpeedSensor_ErrorCode').html('');
     ManuallySendCmd('{"VehicleTest":"SpeedSensor"}');
 
 }
 function TestSpeedSensorEnd(param) {
     DLmsg.close()
     var jsonObj = JSON.parse(param);
-    $('#TestSpeedSensor').html(jsonObj.VehicleTestSpeedSensor);
+    var res = jsonObj.VehicleTestSpeedSensor
+    if (res === 'Pass') {
+        $('#TestSpeedSensor').html('Pass');
+    } else {
+        $('#TestSpeedSensor').html('Fail');
+        $('#TestSpeedSensor_ErrorCode').html(res);
+        $('#TestSpeedSensor_ErrorCode').attr('onclick', "PDFFile('" + res + "')");
+    }
+
 }
 function TestMotor() {
     DLmsg.DLinit('VehicleTest Motor');
     DLmsg.open()
     $('#TestMotor').html('Testing');
+    $('#TestMotor_ErrorCode').html('');
     ManuallySendCmd('{"VehicleTest":"Motor"}');
 
 }
 function TestMotorEnd(param) {
     DLmsg.close()
     var jsonObj = JSON.parse(param);
-    $('#TestMotor').html(jsonObj.VehicleTestMotor);
+    var res = jsonObj.VehicleTestMotor
+    if (res === 'Pass') {
+        $('#TestMotor').html('Pass');
+    } else {
+        $('#TestMotor').html('Fail');
+        $('#TestMotor_ErrorCode').html(res);
+        $('#TestMotor_ErrorCode').attr('onclick', "PDFFile('" + res + "')");
+    }
 }
 function TestBattery() {
     DLmsg.DLinit('VehicleTest Battery');
     DLmsg.open()
     $('#TestBattery').html('Testing');
+    $('#TestBattery_ErrorCode').html('');
     ManuallySendCmd('{"VehicleTest":"Battery"}');
 }
 function TestBatteryEnd(param) {
     DLmsg.close()
     var jsonObj = JSON.parse(param);
-    $('#TestBattery').html(jsonObj.VehicleTestBattery);
+    var res = jsonObj.VehicleTestBattery
+    if (res === 'Pass') {
+        $('#TestBattery').html('Pass');
+    } else {
+        $('#TestBattery').html('Fail');
+        $('#TestBattery_ErrorCode').html(res);
+        $('#TestBattery_ErrorCode').attr('onclick', "PDFFile('" + res + "')");
+    }
 }
 function PREFERENCE_Mode(param) {
 
@@ -351,17 +409,42 @@ function getCookie(cname) {
     return "";
 }
 function PrintSet(params) {
-    var v1 = $('#PRD_LMOD_DATE').val();
-    console.log(v1)
-    setCookie("value1", v1)
+    // DoInfo();
+    var Display_PRD_SW_VER = $('#PRD_SW_VER').val();
+    console.log(Display_PRD_SW_VER)
+    setCookie("Display_PRD_SW_VER", Display_PRD_SW_VER)
+    var Display_FAC_ACU_DIST = $('#FAC_ACU_DIST').val();
+    console.log(Display_FAC_ACU_DIST)
+    setCookie("Display_FAC_ACU_DIST", Display_FAC_ACU_DIST)
+    var Display_FAC_ACU_TIME = $('#FAC_ACU_TIME').val();
+    console.log(Display_FAC_ACU_TIME)
+    setCookie("Display_FAC_ACU_TIME", Display_FAC_ACU_TIME)
+    var Driver_PRD_SW_VER = $('#Driver_PRD_SW_VER').val();
+    console.log(Driver_PRD_SW_VER)
+    setCookie("Driver_PRD_SW_VER", Driver_PRD_SW_VER)
     window.open('print.html', '_blank')
 }
 function PrintLoad() {
-    var v1 = getCookie("value1");
-    console.log(v1)
-    $('#id1').html(v1);
+    var Display_PRD_SW_VER = getCookie("Display_PRD_SW_VER");
+    $('#Display_PRD_SW_VER').html(Display_PRD_SW_VER);
+    var Display_FAC_ACU_DIST = getCookie("Display_FAC_ACU_DIST");
+    $('#Display_FAC_ACU_DIST').html(Display_FAC_ACU_DIST);
+    var Display_FAC_ACU_TIME = getCookie("Display_FAC_ACU_TIME");
+    $('#Display_FAC_ACU_TIME').html(Display_FAC_ACU_TIME);
+    var Driver_PRD_SW_VER = getCookie("Driver_PRD_SW_VER");
+    $('#Driver_PRD_SW_VER').html(Driver_PRD_SW_VER);
+    $('#NowTime').html(NowTimeFormat())
 }
-
+function NowTimeFormat() {
+    var n = new Date();
+    var dy = n.getFullYear();
+    var dm = n.getMonth() + 1;
+    var dd = n.getDate();
+    var dh = n.getHours();
+    var dmin = n.getMinutes();
+    var dsec = n.getSeconds();
+    return dy + '-' + dm + '-' + dd + ' ' + dh + ':' + dmin + ":" + dsec;
+}
 function timeConverter(UNIX_timestamp) {
     var a = new Date(UNIX_timestamp * 1000);
     var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -479,12 +562,21 @@ function TestBT() {
     DLmsg.setMsg('test bt');
     DLmsg.open();
     $('#TestBT').html('Testing');
+    $('#TestBT_ErrorCode').html('');
     ManuallySendCmd('{"VehicleTest":"BT"}');
 }
 function TestBTEnd(param) {
     DLmsg.close()
     var jsonObj = JSON.parse(param);
-    $('#TestBT').html(jsonObj.VehicleTestBT);
+    var res = jsonObj.VehicleTestBT
+    if (res === 'Pass') {
+        $('#TestBT').html('Pass');
+    } else {
+        $('#TestBT').html('Fail');
+        $('#TestBT_ErrorCode').html(res);
+        $('#TestBT_ErrorCode').attr('onclick', "PDFFile('" + res + "')");
+    }
+
 }
 // $('#TRTestBT').after('<tr></tr>').hide();
 
@@ -551,12 +643,13 @@ function DoCheckFWPart1(param) {
 }
 function DoInfo() {
     var isReadAll = getCookie('ckIsReadALL')
+    console.log('isReadAll:' + isReadAll)
     var sCmd = ""
-    if (isReadAll === 'True') {
+    if (isReadAll !== 'True') {
         sCmd = '{"Read":"All"}';
+        setCookie('ckIsReadALL', 'True');
     } else {
         sCmd = '{"OnlyRead":"All"}';
-        setCookie('ckIsReadALL', 'True');
     }
 
     DLmsg.DLinit('');

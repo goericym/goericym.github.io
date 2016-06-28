@@ -99,7 +99,7 @@ function CCS_pass() {
 }
 function CCS_fail() {
 
-  DLmsg.setMsg('Your dongle 沒有接好 ! please check connected');
+  DLmsg.setMsg('Your dongle not connect ! please check connected !');
 
   //回到step4
   CV_pass();
@@ -133,7 +133,7 @@ function doConnect() {
   try {
     var n = new Date().toLocaleString();
     console.log(n)
-    DLmsg.setMsg('Please Waiting... <a hef="#">download</a> <a hef="#">FAQ</a>>');
+    DLmsg.setMsg('Please Waiting... <a hef="#">download</a> <a hef="#">FAQ</a>');
     url = "ws://127.0.0.1:58000/";
     websocket = new WebSocket(url);
     websocket.onopen = function (evt) { WSOpen(evt) };
@@ -273,33 +273,8 @@ function WSMessage(evt) {
 
 
 
-function doTestLightFinish(param) {
 
-  // $("#test2").attr("disabled", false);
-  DLmsg.close()
-  myTimer = setInterval(AutoSend, 2000)
-  $('#TestLight').html(param)
-  // DLmsg.setMsg('Test Light : Finish');
-}
-function doTestLight(param) {
-  var jsonObj = JSON.parse(param);
-  var res = jsonObj.VehicleTestLight;
-  if (TLCount >= 3) {
-    doTestLightFinish(res);
-    return true;
-  }
 
-  if (res === 'Pass') {
-    TLCount++;
-    DLmsg.setMsg('Test Light : ' + TLCount);
-    setTimeout(TestLight, 1000);
-    return true;
-  }
-  else {
-    doTestLightFinish(res);
-    return false;
-  }
-}
 
 function WSError(evt) {
   websocket.close();
