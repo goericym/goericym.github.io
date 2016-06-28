@@ -577,9 +577,11 @@ function DoReadAll(param) {
     }
 }
 function DoInfo_Dispaly() {
+    console.log('DoInfo_Dispaly');
     DoInfo();
 }
 function DoInfo_Driver() {
+    console.log('DoInfo_Driver');
     DoInfo();
 }
 // $('#id_Console_FW').hide();

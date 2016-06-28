@@ -222,7 +222,7 @@ function WSMessage(evt) {
     return;
   }
 
-  if (inputtext === '{"Read":"All"}') {
+  if (inputtext === '{"Read":"All"}' || inputtext === '{"OnlyRead":"All"}') {
     DoReadAll(eData)
     return;
   }
