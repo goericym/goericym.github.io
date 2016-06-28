@@ -223,24 +223,17 @@ function WSMessage(evt) {
   }
 
   if (inputtext === '{"Read":"All"}') {
-    DLmsg.close()
-    JsonParser_Display(eData)
-    JsonParser_Driver(eData)
-    // JsonParser_Battery(eData)
-    setCookie('ckIsReadDP', 'True')
-    if (eData === '{"Read":"Pass"}') {
-      myTimer = setInterval(AutoSend, 2000)// read all 由這裡來啟動timer
-    }
+    DoReadAll(eData)
     return;
   }
   //Part B 啟動AutoSend
   myTimer = setInterval(AutoSend, 2000)
 
-  if (inputtext == '{"OnlyRead":"Display"}') {
+  if (inputtext === '{"OnlyRead":"Display"}') {
     DLmsg.close()
     JsonParser_Display(eData)
   }
-  if (inputtext == '{"Read":"Display"}') {
+  if (inputtext === '{"Read":"Display"}') {
     DLmsg.close()
     JsonParser_Display(eData)
     setCookie('ckIsReadDP', 'True')

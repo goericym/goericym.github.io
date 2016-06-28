@@ -328,10 +328,10 @@ function PDFFile(params) {
     $('#Print').html(el)
     showDiv('Print');
 }
-
+//http://www.w3schools.com/js/js_cookies.asp
 function setCookie(cname, cvalue) {
     var d = new Date();
-    d.setTime(d.getTime() + 18000);//exDays * 24 * 60 * 60 * 1000
+    d.setTime(d.getTime() + 300000);//exDays * 24 * 60 * 60 * 1000
     var expires = "expires=" + d.toGMTString();
     document.cookie = cname + "=" + cvalue + "; " + expires;
 }
@@ -341,10 +341,10 @@ function getCookie(cname) {
     var ca = document.cookie.split(';');
     for (var i = 0; i < ca.length; i++) {
         var c = ca[i];
-        while (c.charAt(0) == ' ') {
+        while (c.charAt(0) === ' ') {
             c = c.substring(1);
         }
-        if (c.indexOf(name) == 0) {
+        if (c.indexOf(name) === 0) {
             return c.substring(name.length, c.length);
         }
     }
@@ -448,13 +448,7 @@ function bar_Upgrade_Show(param) {
 
 }
 
-function DoInfo() {
-    DLmsg.DLinit('');
-    DLmsg.setMsg('Get information please wait');
-    DLmsg.open();
-    ManuallySendCmd('{"Read":"All"}');
 
-}
 
 function DoTestRecode() {
     DLmsg.DLinit('');
@@ -554,6 +548,39 @@ function DoCheckFWPart1(param) {
 
     });
 
+}
+function DoInfo() {
+    var isReadAll = getCookie('ckIsReadALL')
+    var sCmd = ""
+    if (isReadAll === 'True') {
+        sCmd = '{"Read":"All"}';
+    } else {
+        sCmd = '{"OnlyRead":"All"}';
+        setCookie('ckIsReadALL', 'True');
+    }
+
+    DLmsg.DLinit('');
+    DLmsg.setMsg('Get information please wait');
+    DLmsg.open();
+    ManuallySendCmd(sCmd);
+    // ManuallySendCmd('{"Read":"All"}');
+
+}
+function DoReadAll(param) {
+    JsonParser_Display(param)
+    JsonParser_Driver(param)
+    // JsonParser_Battery(eData)
+    setCookie('ckIsReadDP', 'True')
+    if (param === '{"Read":"Pass"}') {
+        DLmsg.close()
+        myTimer = setInterval(AutoSend, 2000)// read all 由這裡來啟動timer
+    }
+}
+function DoInfo_Dispaly() {
+    DoInfo();
+}
+function DoInfo_Driver() {
+    DoInfo();
 }
 // $('#id_Console_FW').hide();
 // $('#id_Display_FW').hide();
