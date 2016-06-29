@@ -1,6 +1,6 @@
 function DialogMsg() {
     var dialog;
-
+    var _isOpen = false;
     this.DLinit = function (param) {
         dialog = new BootstrapDialog({
             type: BootstrapDialog.TYPE_SUCCESS,
@@ -14,16 +14,23 @@ function DialogMsg() {
     };
 
     this.open = function () {
+
         dialog.open();
+        _isOpen = true;
+
     }
     this.close = function () {
         //     // setTimeout(function () { dialog.close(); }, 500);
         dialog.close();
+        _isOpen = false;
     }
     this.setMsg = function (param) {
         dialog.setMessage(param);
     }
+    this.isOpen = function () {
 
+        return _isOpen;
+    }
 
 }
 function DialogBtnOk() {
@@ -79,7 +86,7 @@ function DialogBtnOk() {
     }
     this.btnOnShow = function (callback_fun) {
         dialog.onShown(callback_fun)
-        
+
     }
     this.btnOnHide = function (callback_fun) {
         dialog.onHide(callback_fun)

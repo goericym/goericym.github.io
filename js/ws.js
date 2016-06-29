@@ -183,7 +183,6 @@ function doCheckStatus(param) {
     CCStatus = true;
   }
   CheckComStatus(CCStatus, CCS_pass, CCS_fail);
-  bkeepConn = true;
 }
 function WSMessage(evt) {
   reloadCount = 0;
@@ -265,13 +264,27 @@ function WSMessage(evt) {
   if (inputtext === '{"GetFWVer":""}') {
     DoCheckFWPart1(eData);
   }
+  if (inputtext === '{"KeepConn":"None"}') {
+    DoCheckKeepConn(eData);
+  }
   // if (inputtext === '{"VehicleTest":"Display_Part2"}') {
   //   TestDisplay2End(eData);
   // }
 }
 
 
+function DoCheckKeepConn(param) {
+  var jsonObj = JSON.parse(param);
+  if (jsonObj.KeepConn === 'Fail') {
+    if (DLmsg.isOpen() === false) {
+      DLmsg.DLinit('Connect NG!');
+      DLmsg.open();
+    }
 
+  } else {
+    DLmsg.close();
+  }
+}
 
 
 
